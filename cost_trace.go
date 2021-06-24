@@ -21,7 +21,7 @@ func (n *constNode) cost() int64 {
 	return n.endTime.Sub(n.startTime).Milliseconds()
 }
 
-func Init(ctx context.Context, title string) context.Context {
+func New(ctx context.Context, title string) context.Context {
 	return context.WithValue(ctx, key, &constNode{title: title, startTime: time.Now()})
 }
 
@@ -66,21 +66,15 @@ func ToString(ctx context.Context) (ret string) {
 	if !ok {
 		return ""
 	}
-	const fmtStr = "%s%s:%dms\n"
-	var levelPrint func(level int, node *constNode)
-	levelPrint = func(level int, node *constNode) {
+	const fmtStr = "%s%s (%dms)\n"
+	var levelPrint func(level int, node *constNode, prefix string)
+	levelPrint = func(level int, node *constNode, prefix string) {
 		var (
-			tabs       string
 			lastTabs   string
 			noLastTabs string
 		)
-		if level > 0 {
-			for i := 0; i < level; i++ {
-				tabs += "│\t"
-			}
-		}
-		noLastTabs = tabs + "├"
-		lastTabs = tabs + "└"
+		noLastTabs = prefix + "├"
+		lastTabs = prefix + "└"
 		for i, child := range node.child {
 			if i == len(node.child)-1 {
 				ret += fmt.Sprintf(fmtStr, lastTabs, child.title, child.cost())
@@ -88,11 +82,15 @@ func ToString(ctx context.Context) (ret string) {
 				ret += fmt.Sprintf(fmtStr, noLastTabs, child.title, child.cost())
 			}
 			if len(child.child) > 0 {
-				levelPrint(level+1, child)
+				if i == len(node.child)-1 {
+					levelPrint(level+1, child, prefix+"\t")
+				} else {
+					levelPrint(level+1, child, prefix+"│\t")
+				}
 			}
 		}
 	}
 	ret += fmt.Sprintf(fmtStr, "", father.title, father.cost())
-	levelPrint(0, father)
+	levelPrint(0, father, "")
 	return
 }
