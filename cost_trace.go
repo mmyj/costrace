@@ -33,22 +33,7 @@ func Done(ctx context.Context) {
 	father.endTime = time.Now()
 }
 
-// Trace 计算单个函数耗时
-func Trace(ctx context.Context, title string, fn func()) {
-	father, ok := ctx.Value(key).(*constNode)
-	if !ok {
-		fn()
-		return
-	}
-
-	child := &constNode{title: title, startTime: time.Now()}
-	fn()
-	child.endTime = time.Now()
-	father.child = append(father.child, child)
-}
-
-// TraceInto 需要计算函数内部耗时
-func TraceInto(ctx context.Context, title string, fn func(ctx context.Context)) {
+func Trace(ctx context.Context, title string, fn func(ctx context.Context)) {
 	father, ok := ctx.Value(key).(*constNode)
 	if !ok {
 		fn(ctx)

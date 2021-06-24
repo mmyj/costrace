@@ -11,16 +11,16 @@ import (
 
 func a(ctx context.Context) {
 	time.Sleep(time.Millisecond * 10)
-	costrace.Trace(ctx, "a2", func() {
+	costrace.Trace(ctx, "a2", func(context.Context) {
 		a2()
 	})
-	costrace.TraceInto(ctx, "a1", func(ctx2 context.Context) {
+	costrace.Trace(ctx, "a1", func(ctx2 context.Context) {
 		a1(ctx2)
 	})
 }
 func a1(ctx context.Context) {
 	time.Sleep(time.Millisecond * 60)
-	costrace.Trace(ctx, "a3", func() {
+	costrace.Trace(ctx, "a3", func(context.Context) {
 		a3()
 	})
 }
@@ -32,10 +32,10 @@ func a3() {
 }
 func b(ctx context.Context) {
 	time.Sleep(time.Millisecond * 20)
-	costrace.Trace(ctx, "b1", func() {
+	costrace.Trace(ctx, "b1", func(context.Context) {
 		b1()
 	})
-	costrace.Trace(ctx, "b2", func() {
+	costrace.Trace(ctx, "b2", func(context.Context) {
 		b2()
 	})
 }
@@ -55,13 +55,13 @@ func Test1(t *testing.T) {
 		costrace.Done(ctx)
 		fmt.Print(costrace.ToString(ctx))
 	}()
-	costrace.Trace(ctx, "c", func() {
+	costrace.Trace(ctx, "c", func(context.Context) {
 		c()
 	})
-	costrace.TraceInto(ctx, "a", func(ctx2 context.Context) {
+	costrace.Trace(ctx, "a", func(ctx2 context.Context) {
 		a(ctx2)
 	})
-	costrace.TraceInto(ctx, "b", func(ctx2 context.Context) {
+	costrace.Trace(ctx, "b", func(ctx2 context.Context) {
 		b(ctx2)
 	})
 }
