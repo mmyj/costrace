@@ -74,3 +74,17 @@ func Test2(t *testing.T) {
 	}()
 	time.Sleep(time.Millisecond * 100)
 }
+
+func Test3(t *testing.T) {
+	ctx := costrace.New(context.Background(), "Test3")
+	defer func() {
+		costrace.Done(ctx)
+		fmt.Print(costrace.ToString(ctx))
+	}()
+	ctxSeg := costrace.SegmentTrace(ctx, "cost of segment")
+	time.Sleep(time.Millisecond * 10)
+	costrace.SegmentDone(ctxSeg)
+	costrace.Trace(ctx, "a", func(ctx context.Context) {
+		a(ctx)
+	})
+}
