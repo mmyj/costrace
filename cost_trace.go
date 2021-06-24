@@ -6,7 +6,9 @@ import (
 	"time"
 )
 
-const key = "cost_race_key"
+type costRaceKey int
+
+var key costRaceKey
 
 type constNode struct {
 	startTime time.Time
