@@ -51,7 +51,7 @@ func ToString(ctx context.Context) (ret string) {
 	if !ok {
 		return ""
 	}
-	const fmtStr = "%s%s (%dms)\n"
+	const fmtStr = "%s%s (%dms) (%d%%)\n"
 	var levelPrint func(level int, node *constNode, prefix string)
 	levelPrint = func(level int, node *constNode, prefix string) {
 		var (
@@ -61,11 +61,11 @@ func ToString(ctx context.Context) (ret string) {
 		noLastTabs = prefix + "├"
 		lastTabs = prefix + "└"
 		for i, child := range node.child {
+			tabs := noLastTabs
 			if i == len(node.child)-1 {
-				ret += fmt.Sprintf(fmtStr, lastTabs, child.title, child.cost().Milliseconds())
-			} else {
-				ret += fmt.Sprintf(fmtStr, noLastTabs, child.title, child.cost().Milliseconds())
+				tabs = lastTabs
 			}
+			ret += fmt.Sprintf(fmtStr, tabs, child.title, child.cost().Milliseconds(), child.cost().Milliseconds()*100/node.cost().Milliseconds())
 			if len(child.child) > 0 {
 				if i == len(node.child)-1 {
 					levelPrint(level+1, child, prefix+"\t")
@@ -75,7 +75,7 @@ func ToString(ctx context.Context) (ret string) {
 			}
 		}
 	}
-	ret += fmt.Sprintf(fmtStr, "", father.title, father.cost().Milliseconds())
+	ret += fmt.Sprintf(fmtStr, "", father.title, father.cost().Milliseconds(), 100)
 	levelPrint(0, father, "")
 	return
 }
