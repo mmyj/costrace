@@ -17,8 +17,8 @@ type constNode struct {
 	child     []*constNode
 }
 
-func (n *constNode) cost() int64 {
-	return n.endTime.Sub(n.startTime).Milliseconds()
+func (n *constNode) cost() time.Duration {
+	return n.endTime.Sub(n.startTime)
 }
 
 func New(ctx context.Context, title string) context.Context {
@@ -77,9 +77,9 @@ func ToString(ctx context.Context) (ret string) {
 		lastTabs = prefix + "└"
 		for i, child := range node.child {
 			if i == len(node.child)-1 {
-				ret += fmt.Sprintf(fmtStr, lastTabs, child.title, child.cost())
+				ret += fmt.Sprintf(fmtStr, lastTabs, child.title, child.cost().Milliseconds())
 			} else {
-				ret += fmt.Sprintf(fmtStr, noLastTabs, child.title, child.cost())
+				ret += fmt.Sprintf(fmtStr, noLastTabs, child.title, child.cost().Milliseconds())
 			}
 			if len(child.child) > 0 {
 				if i == len(node.child)-1 {
@@ -90,7 +90,7 @@ func ToString(ctx context.Context) (ret string) {
 			}
 		}
 	}
-	ret += fmt.Sprintf(fmtStr, "", father.title, father.cost())
+	ret += fmt.Sprintf(fmtStr, "", father.title, father.cost().Milliseconds())
 	levelPrint(0, father, "")
 	return
 }
