@@ -14,8 +14,8 @@ func a(ctx context.Context) {
 	costrace.Trace(ctx, "a2", func(context.Context) {
 		a2()
 	})
-	costrace.Trace(ctx, "a1", func(ctx2 context.Context) {
-		a1(ctx2)
+	costrace.Trace(ctx, "a1", func(ctx context.Context) {
+		a1(ctx)
 	})
 }
 func a1(ctx context.Context) {
@@ -58,11 +58,11 @@ func Test1(t *testing.T) {
 	costrace.Trace(ctx, "c", func(context.Context) {
 		c()
 	})
-	costrace.Trace(ctx, "a", func(ctx2 context.Context) {
-		a(ctx2)
+	costrace.Trace(ctx, "a", func(ctx context.Context) {
+		a(ctx)
 	})
-	costrace.Trace(ctx, "b", func(ctx2 context.Context) {
-		b(ctx2)
+	costrace.Trace(ctx, "b", func(ctx context.Context) {
+		b(ctx)
 	})
 }
 

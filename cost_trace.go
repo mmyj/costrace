@@ -30,7 +30,9 @@ func Done(ctx context.Context) {
 	if !ok {
 		return
 	}
-	father.endTime = time.Now()
+	if father.endTime.IsZero() {
+		father.endTime = time.Now()
+	}
 }
 
 func Trace(ctx context.Context, title string, fn func(ctx context.Context)) {
@@ -51,21 +53,28 @@ func ToString(ctx context.Context) (ret string) {
 	if !ok {
 		return ""
 	}
-	const fmtStr = "%s%s (%dms) (%d%%)\n"
+	Done(ctx)
+	const fmtStr = "%s%s (%dms-%d%%)\n"
 	var levelPrint func(level int, node *constNode, prefix string)
 	levelPrint = func(level int, node *constNode, prefix string) {
 		var (
 			lastTabs   string
 			noLastTabs string
 		)
-		noLastTabs = prefix + "├"
-		lastTabs = prefix + "└"
+		noLastTabs = prefix + "├─ "
+		lastTabs = prefix + "└─ "
 		for i, child := range node.child {
 			tabs := noLastTabs
 			if i == len(node.child)-1 {
 				tabs = lastTabs
 			}
-			ret += fmt.Sprintf(fmtStr, tabs, child.title, child.cost().Milliseconds(), child.cost().Milliseconds()*100/node.cost().Milliseconds())
+			childCostMs := child.cost().Milliseconds()
+			fatherCostMs := node.cost().Milliseconds()
+			radio := int64(0)
+			if fatherCostMs > 0 {
+				radio = childCostMs * 100 / fatherCostMs
+			}
+			ret += fmt.Sprintf(fmtStr, tabs, child.title, childCostMs, radio)
 			if len(child.child) > 0 {
 				if i == len(node.child)-1 {
 					levelPrint(level+1, child, prefix+"\t")
