@@ -3,6 +3,7 @@ package costrace_test
 import (
 	"context"
 	"fmt"
+	"sync"
 	"testing"
 	"time"
 
@@ -49,7 +50,7 @@ func c() {
 	time.Sleep(time.Millisecond * 30)
 }
 
-func Test1(t *testing.T) {
+func TestTrace(t *testing.T) {
 	ctx := costrace.New(context.Background(), "Test1")
 	defer func() {
 		costrace.Done(ctx)
@@ -66,16 +67,7 @@ func Test1(t *testing.T) {
 	})
 }
 
-func Test2(t *testing.T) {
-	ctx := costrace.New(context.Background(), "Test2")
-	defer func() {
-		costrace.Done(ctx)
-		fmt.Print(costrace.ToString(ctx))
-	}()
-	time.Sleep(time.Millisecond * 100)
-}
-
-func Test3(t *testing.T) {
+func TestSegmentTrace(t *testing.T) {
 	ctx := costrace.New(context.Background(), "Test3")
 	defer func() {
 		costrace.Done(ctx)
@@ -87,4 +79,30 @@ func Test3(t *testing.T) {
 	costrace.Trace(ctx, "a", func(ctx context.Context) {
 		a(ctx)
 	})
+}
+
+func TestGoroutineTrace(t *testing.T) {
+	ctx := costrace.New(context.Background(), "TestGoroutineTrace")
+	defer func() {
+		costrace.Done(ctx)
+		fmt.Print(costrace.ToString(ctx))
+	}()
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	parallelCtx := costrace.ParallelTrace(ctx, 2)
+	go func(ctx context.Context) {
+		costrace.Trace(ctx, "a", func(ctx context.Context) {
+			a(ctx)
+		})
+		wg.Done()
+	}(parallelCtx)
+	go func(ctx context.Context) {
+		ctxSeg := costrace.SegmentTrace(ctx, "cost of segment")
+		time.Sleep(time.Millisecond * 10)
+		costrace.SegmentDone(ctxSeg)
+		wg.Done()
+	}(parallelCtx)
+	wg.Wait()
+	costrace.ParallelDone(parallelCtx)
 }
