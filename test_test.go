@@ -74,7 +74,9 @@ func TestSegmentTrace(t *testing.T) {
 		fmt.Print(costrace.ToString(ctx))
 	}()
 	ctxSeg := costrace.SegmentTrace(ctx, "cost of segment")
-	time.Sleep(time.Millisecond * 10)
+	costrace.Trace(ctxSeg, "a in the segment", func(ctx context.Context) {
+		a(ctx)
+	})
 	costrace.SegmentDone(ctxSeg)
 	costrace.Trace(ctx, "a", func(ctx context.Context) {
 		a(ctx)
@@ -99,7 +101,9 @@ func TestGoroutineTrace(t *testing.T) {
 	}(parallelCtx)
 	go func(ctx context.Context) {
 		ctxSeg := costrace.SegmentTrace(ctx, "cost of segment")
-		time.Sleep(time.Millisecond * 10)
+		costrace.Trace(ctxSeg, "a in the segment", func(ctx context.Context) {
+			a(ctx)
+		})
 		costrace.SegmentDone(ctxSeg)
 		wg.Done()
 	}(parallelCtx)
