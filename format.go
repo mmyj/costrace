@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// ToString format a tracer to string
 func ToString(ctx context.Context) (ret string) {
 	father, ok := ctx.Value(key).(*constNode)
 	if !ok {
